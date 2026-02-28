@@ -1,0 +1,75 @@
+import Link from "next/link";
+
+import { auth, signOut } from "@/auth";
+import { CartPill } from "@/components/cart/cart-pill";
+import { canAccessAdmin } from "@/lib/roles";
+
+const navItems = [
+  { href: "/", label: "Accueil" },
+  { href: "/catalog", label: "Catalogue" },
+  { href: "/checkout", label: "Paiement" },
+];
+
+export async function SiteHeader() {
+  const session = await auth();
+  const canOpenAdmin = canAccessAdmin(session?.user?.role ?? "guest");
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-[color:var(--line)] bg-[color:var(--background)]/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 md:px-10">
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex flex-col">
+            <span className="font-display text-2xl font-semibold tracking-[0.08em]">
+              JOSY
+            </span>
+            <span className="-mt-1 text-xs uppercase tracking-[0.35em] text-[color:var(--muted)]">
+              Cosmetics
+            </span>
+          </Link>
+
+          <nav className="hidden items-center gap-5 text-sm text-[color:var(--muted)] md:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="transition hover:text-[color:var(--ink)]"
+              >
+                {item.label}
+              </Link>
+            ))}
+            {canOpenAdmin ? (
+              <Link href="/admin" className="transition hover:text-[color:var(--ink)]">
+                Admin
+              </Link>
+            ) : null}
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <CartPill />
+          {session?.user ? (
+            <>
+              <Link href="/account" className="chip hidden md:inline-flex">
+                {session.user.name ?? session.user.email}
+              </Link>
+              <form
+                action={async () => {
+                  "use server";
+                  await signOut({ redirectTo: "/" });
+                }}
+              >
+                <button type="submit" className="btn-secondary">
+                  Déconnexion
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link href="/login" className="btn-secondary">
+              Connexion
+            </Link>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

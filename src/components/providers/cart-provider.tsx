@@ -19,7 +19,7 @@ type CartContextValue = {
   clearCart: () => void;
 };
 
-const STORAGE_KEY = "era-beauty-cart";
+const STORAGE_KEY = "josy-cosmetics-cart";
 
 const CartContext = createContext<CartContextValue | null>(null);
 

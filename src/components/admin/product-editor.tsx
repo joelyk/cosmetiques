@@ -5,7 +5,7 @@ import { Database, Download, Plus, Save } from "lucide-react";
 
 import type { Product, ProductCategory, UserRole } from "@/types/catalog";
 
-const STORAGE_KEY = "era-beauty-admin-product-draft";
+const STORAGE_KEY = "josy-cosmetics-admin-product-draft";
 
 const slugify = (value: string) =>
   value
@@ -111,7 +111,7 @@ export function ProductEditor({
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "era-beauty-products.json";
+    anchor.download = "josy-cosmetics-products.json";
     anchor.click();
     URL.revokeObjectURL(url);
     setStatus("Export JSON pret pour GitHub ou une sauvegarde manuelle.");

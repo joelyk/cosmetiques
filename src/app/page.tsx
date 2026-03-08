@@ -59,10 +59,10 @@ export default async function HomePage() {
               <p className="text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
                 Deux roles admin
               </p>
-              <p className="mt-4 text-3xl font-semibold">Super admin + admin</p>
+              <p className="mt-4 text-3xl font-semibold">Email magic link</p>
               <p className="mt-3 text-sm text-[color:var(--muted)]">
-                Emails whitelistes avec Google Auth, sans stocker de mot de
-                passe client sur le site.
+                Connexion par lien email et roles admin pilotes par liste
+                d&apos;emails, sans mot de passe local.
               </p>
             </div>
             <div className="panel bg-white/75 p-5 sm:col-span-2">

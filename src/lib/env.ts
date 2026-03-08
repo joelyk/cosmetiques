@@ -5,8 +5,9 @@ const normalizeEmailList = (value?: string) =>
     .filter(Boolean);
 
 export const env = {
-  hasGoogleAuth: Boolean(
-    process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
+  hasSupabaseClient: Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   ),
   hasSupabaseRead: Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&

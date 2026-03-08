@@ -62,7 +62,7 @@ export function ImageStudio() {
   const [tolerance, setTolerance] = useState(42);
 
   const sourceName =
-    sourceFile?.name.replace(/\.[^.]+$/, "") ?? "era-beauty-product";
+    sourceFile?.name.replace(/\.[^.]+$/, "") ?? "josy-cosmetics-product";
 
   const handleFileChange = async (file: File | null) => {
     setSourceFile(file);

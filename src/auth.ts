@@ -1,37 +1,66 @@
-import NextAuth, { type NextAuthConfig } from "next-auth";
-import Google from "next-auth/providers/google";
+import "server-only";
 
-import { env } from "@/lib/env";
+import { redirect } from "next/navigation";
+
 import { getUserRole } from "@/lib/roles";
+import { createSupabaseServerAuthClient } from "@/lib/supabase-auth-server";
+import type { UserRole } from "@/types/catalog";
 
-const providers = env.hasGoogleAuth
-  ? [
-      Google({
-        clientId: process.env.AUTH_GOOGLE_ID!,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-      }),
-    ]
-  : [];
-
-const config: NextAuthConfig = {
-  providers,
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login",
-  },
-  callbacks: {
-    jwt({ token, user }) {
-      const email = user?.email ?? token.email;
-      token.role = getUserRole(email);
-      return token;
-    },
-    session({ session, token }) {
-      session.user.role = getUserRole(token.email);
-      return session;
-    },
-  },
+export type AppSession = {
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+    role: UserRole;
+  };
 };
 
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+const getDisplayName = (user: {
+  email?: string | null;
+  user_metadata?: { full_name?: unknown; name?: unknown };
+}) => {
+  const fullName =
+    typeof user.user_metadata?.full_name === "string"
+      ? user.user_metadata.full_name
+      : typeof user.user_metadata?.name === "string"
+        ? user.user_metadata.name
+        : null;
+
+  return fullName ?? user.email ?? null;
+};
+
+export async function auth(): Promise<AppSession | null> {
+  try {
+    const supabase = await createSupabaseServerAuthClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return null;
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email ?? null,
+        name: getDisplayName(user),
+        role: getUserRole(user.email),
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function signOut({
+  redirectTo = "/",
+}: {
+  redirectTo?: string;
+} = {}) {
+  const supabase = await createSupabaseServerAuthClient();
+
+  await supabase.auth.signOut();
+  redirect(redirectTo);
+}

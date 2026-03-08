@@ -5,7 +5,7 @@ import { Percent, Plus, Save } from "lucide-react";
 
 import type { Product, ProductCategory, Promotion } from "@/types/catalog";
 
-const STORAGE_KEY = "era-beauty-admin-promotion-draft";
+const STORAGE_KEY = "josy-cosmetics-admin-promotion-draft";
 
 const buildNewPromotion = (): Promotion => ({
   id: `promotion-${Date.now()}`,

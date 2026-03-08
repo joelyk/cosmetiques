@@ -1,18 +1,26 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth, signIn } from "@/auth";
+import { auth } from "@/auth";
+import { EmailLoginForm } from "@/components/auth/email-login-form";
 import { env } from "@/lib/env";
 
 type LoginPageProps = {
   searchParams: Promise<{
+    error?: string;
     next?: string;
   }>;
 };
 
+const errorMessages: Record<string, string> = {
+  invalid_link:
+    "Le lien email n'est plus valide ou a deja ete utilise. Demande un nouveau lien.",
+  missing_code: "Le lien de connexion email est incomplet.",
+};
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
-  const { next } = await searchParams;
+  const { error, next } = await searchParams;
   const safeNext = next?.startsWith("/") ? next : "/account";
 
   if (session?.user) {
@@ -22,29 +30,25 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <section className="mx-auto max-w-3xl panel p-8 md:p-10">
       <p className="eyebrow">Connexion</p>
-      <h1 className="mt-3 text-4xl font-semibold">Connexion simple via Google</h1>
+      <h1 className="mt-3 text-4xl font-semibold">Connexion simple par email</h1>
       <p className="mt-4 max-w-2xl text-sm text-[color:var(--muted)]">
-        Google est la solution gratuite la plus simple a operer ici. Les
-        clients se connectent sans mot de passe local, et les deux
-        administrateurs sont pilotes par liste emails autorises.
+        Les clients se connectent avec un lien magique envoye par email. Aucun
+        mot de passe local a memoriser, et les deux administrateurs gardent leur
+        role via la liste d&apos;emails autorises.
       </p>
 
-      {env.hasGoogleAuth ? (
-        <form
-          className="mt-8"
-          action={async () => {
-            "use server";
-            await signIn("google", { redirectTo: safeNext });
-          }}
-        >
-          <button type="submit" className="btn-primary">
-            Se connecter avec Google
-          </button>
-        </form>
+      {error ? (
+        <div className="mt-8 rounded-[28px] border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          {errorMessages[error] ?? "Impossible de finaliser la connexion email."}
+        </div>
+      ) : null}
+
+      {env.hasSupabaseClient ? (
+        <EmailLoginForm nextPath={safeNext} />
       ) : (
         <div className="mt-8 rounded-[28px] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-          Configure `AUTH_SECRET`, `AUTH_GOOGLE_ID` et `AUTH_GOOGLE_SECRET`
-          dans l environnement pour activer Google Auth.
+          Configure `NEXT_PUBLIC_SUPABASE_URL` et
+          `NEXT_PUBLIC_SUPABASE_ANON_KEY` pour activer la connexion email.
         </div>
       )}
 

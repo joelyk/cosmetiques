@@ -4,13 +4,13 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 const getSessionId = () => {
-  const existing = window.sessionStorage.getItem("era-beauty-session-id");
+  const existing = window.sessionStorage.getItem("josy-cosmetics-session-id");
   if (existing) {
     return existing;
   }
 
   const nextId = crypto.randomUUID();
-  window.sessionStorage.setItem("era-beauty-session-id", nextId);
+  window.sessionStorage.setItem("josy-cosmetics-session-id", nextId);
   return nextId;
 };
 
@@ -23,7 +23,7 @@ export function SiteVisitTracker() {
     }
 
     const dayKey = new Date().toISOString().slice(0, 10);
-    const key = `era-beauty-page-visit:${dayKey}:${pathname}`;
+    const key = `josy-cosmetics-page-visit:${dayKey}:${pathname}`;
 
     if (window.sessionStorage.getItem(key)) {
       return;

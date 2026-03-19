@@ -13,6 +13,14 @@ const navItems = [
 export async function SiteHeader() {
   const session = await auth();
   const canOpenAdmin = canAccessAdmin(session?.user?.role ?? "guest");
+  const roleLabel =
+    session?.user?.role === "super_admin"
+      ? "Super admin"
+      : session?.user?.role === "admin"
+        ? "Admin"
+        : session?.user
+          ? "Connecte"
+          : null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[color:var(--line)] bg-[color:var(--background)]/90 backdrop-blur-xl">
@@ -49,8 +57,16 @@ export async function SiteHeader() {
           <CartPill />
           {session?.user ? (
             <>
-              <Link href="/account" className="chip hidden md:inline-flex">
-                {session.user.name ?? session.user.email}
+              <Link
+                href="/account"
+                className="chip hidden items-center gap-2 md:inline-flex"
+              >
+                <span>{session.user.name ?? session.user.email}</span>
+                {roleLabel ? (
+                  <span className="rounded-full bg-[color:var(--card-soft)] px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">
+                    {roleLabel}
+                  </span>
+                ) : null}
               </Link>
               <form
                 action={async () => {
@@ -59,7 +75,7 @@ export async function SiteHeader() {
                 }}
               >
                 <button type="submit" className="btn-secondary">
-                  Déconnexion
+                  Deconnexion
                 </button>
               </form>
             </>

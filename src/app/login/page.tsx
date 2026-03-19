@@ -55,8 +55,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="mt-8 rounded-[28px] border border-[color:var(--line)] bg-white p-5 text-sm text-[color:var(--muted)]">
         <p className="font-medium text-[color:var(--ink)]">Acces administrateur</p>
         <p className="mt-2">
-          `SUPER_ADMIN_EMAILS` donne acces au tableau de bord complet.
-          `ADMIN_EMAILS` donne acces au pilotage catalogue et ventes.
+          <code className="rounded bg-[color:var(--card-soft)] px-2 py-1 text-[color:var(--ink)]">
+            SUPER_ADMIN_EMAILS
+          </code>{" "}
+          donne acces au tableau de bord complet.{" "}
+          <code className="rounded bg-[color:var(--card-soft)] px-2 py-1 text-[color:var(--ink)]">
+            ADMIN_EMAILS
+          </code>{" "}
+          donne acces au pilotage catalogue et ventes.
         </p>
       </div>
 

@@ -12,6 +12,8 @@ export type AppSession = {
     email: string | null;
     name: string | null;
     role: UserRole;
+    emailConfirmedAt: string | null;
+    lastSignInAt: string | null;
   };
 };
 
@@ -47,6 +49,8 @@ export async function auth(): Promise<AppSession | null> {
         email: user.email ?? null,
         name: getDisplayName(user),
         role: getUserRole(user.email),
+        emailConfirmedAt: user.email_confirmed_at ?? null,
+        lastSignInAt: user.last_sign_in_at ?? null,
       },
     };
   } catch {

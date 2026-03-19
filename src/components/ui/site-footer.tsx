@@ -7,8 +7,9 @@ export function SiteFooter() {
         <div>
           <p className="eyebrow">Josy Cosmetics</p>
           <p className="mt-3 max-w-sm text-sm text-[color:var(--muted)]">
-            Boutique Next.js pensee pour lancer les parfums maintenant puis
-            etendre facilement vers gels douche, laits corporels et coffrets.
+            Boutique e-commerce concue avec Next.js, React, Supabase et Vercel
+            pour lancer les parfums maintenant puis etendre facilement vers
+            gels douche, laits corporels et coffrets.
           </p>
           <p className="mt-4 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
             Fait par GeniusClassrooms

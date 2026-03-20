@@ -4,6 +4,7 @@ import { ShieldCheck, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { getRoleLabel } from "@/lib/roles";
 import { createSupabaseBrowserAuthClient } from "@/lib/supabase-auth-browser";
 import type { UserRole } from "@/types/catalog";
 
@@ -103,7 +104,7 @@ export function AccountProfileForm({
           <div className="field">
             <span>Role</span>
             <div className="rounded-[20px] border border-[color:var(--line)] bg-[color:var(--background)] px-4 py-3 font-medium capitalize">
-              {role.replace("_", " ")}
+              {getRoleLabel(role)}
             </div>
           </div>
         </div>

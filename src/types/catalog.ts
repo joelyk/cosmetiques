@@ -1,4 +1,9 @@
-export type UserRole = "guest" | "customer" | "admin" | "super_admin";
+export type UserRole =
+  | "guest"
+  | "customer"
+  | "admin_catalog"
+  | "admin_sales"
+  | "super_admin";
 
 export type ProductCategory = {
   id: string;
@@ -81,7 +86,7 @@ export type AdminInviteStatus =
   | "revoked"
   | "expired";
 
-export type AdminMemberRole = "admin" | "super_admin";
+export type AdminMemberRole = "admin_catalog" | "admin_sales" | "super_admin";
 
 export type AdminTeamMember = {
   email: string;
@@ -95,7 +100,7 @@ export type AdminTeamMember = {
 export type AdminInvite = {
   id: string;
   email: string;
-  role: "admin";
+  role: "admin_catalog" | "admin_sales";
   status: AdminInviteStatus;
   invitedByEmail: string | null;
   createdAt: string;

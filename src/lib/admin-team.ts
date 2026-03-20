@@ -14,7 +14,7 @@ import type {
 
 type AdminMemberRow = {
   email: string;
-  role: AdminMemberRole;
+  role: AdminMemberRole | "admin";
   invited_by_email: string | null;
   created_at: string;
 };
@@ -22,7 +22,7 @@ type AdminMemberRow = {
 type AdminInviteRow = {
   id: string;
   email: string;
-  role: "admin";
+  role: AdminMemberRole | "admin";
   status: AdminInviteStatus;
   invited_by_email: string | null;
   created_at: string;
@@ -45,6 +45,28 @@ type AcceptInviteResult =
     };
 
 const normalizeEmail = (value?: string | null) => value?.trim().toLowerCase() ?? "";
+
+const normalizeAdminRole = (
+  role?: AdminMemberRole | "admin" | null,
+): AdminMemberRole | null => {
+  if (!role) {
+    return null;
+  }
+
+  if (role === "admin") {
+    return "admin_sales";
+  }
+
+  return role;
+};
+
+const normalizeInviteRole = (
+  role?: AdminMemberRole | "admin" | null,
+): AdminInvite["role"] => {
+  const normalizedRole = normalizeAdminRole(role);
+
+  return normalizedRole === "admin_catalog" ? "admin_catalog" : "admin_sales";
+};
 
 const inviteLifetimeInDays = 7;
 
@@ -75,7 +97,7 @@ const getDatabaseAdminRole = async (email?: string | null) => {
       return null;
     }
 
-    return (data.role as AdminMemberRole | null) ?? null;
+    return normalizeAdminRole(data.role as AdminMemberRole | "admin" | null);
   } catch {
     return null;
   }
@@ -97,12 +119,12 @@ export const getUserRole = async (email?: string | null): Promise<UserRole> => {
     return "super_admin";
   }
 
-  if (databaseRole === "admin") {
-    return "admin";
+  if (databaseRole === "admin_catalog" || databaseRole === "admin_sales") {
+    return databaseRole;
   }
 
   if (env.adminEmails.includes(normalized)) {
-    return "admin";
+    return "admin_sales";
   }
 
   return "customer";
@@ -130,7 +152,7 @@ export const getAdminTeamSnapshot = async ({
     if (!members.has(email)) {
       members.set(email, {
         email,
-        role: "admin",
+        role: "admin_sales",
         source: "env_admin",
         createdAt: null,
         invitedByEmail: null,
@@ -181,7 +203,7 @@ export const getAdminTeamSnapshot = async ({
 
       members.set(email, {
         email,
-        role: entry.role,
+        role: normalizeAdminRole(entry.role) ?? "admin_sales",
         source: "database",
         createdAt: entry.created_at,
         invitedByEmail: entry.invited_by_email,
@@ -193,7 +215,7 @@ export const getAdminTeamSnapshot = async ({
       .map((entry) => ({
         id: entry.id,
         email: normalizeEmail(entry.email),
-        role: entry.role,
+        role: normalizeInviteRole(entry.role),
         status:
           entry.status === "pending" &&
           new Date(entry.expires_at).getTime() < Date.now()
@@ -226,10 +248,12 @@ export const getAdminTeamSnapshot = async ({
 
 export const createAdminInvite = async ({
   email,
+  role,
   invitedByEmail,
   origin,
 }: {
   email: string;
+  role: AdminInvite["role"];
   invitedByEmail: string;
   origin: string;
 }) => {
@@ -252,7 +276,11 @@ export const createAdminInvite = async ({
   }
 
   const currentRole = await getUserRole(normalizedEmail);
-  if (currentRole === "admin" || currentRole === "super_admin") {
+  if (
+    currentRole === "admin_catalog" ||
+    currentRole === "admin_sales" ||
+    currentRole === "super_admin"
+  ) {
     throw new Error("Cet email dispose deja d un acces admin.");
   }
 
@@ -271,7 +299,7 @@ export const createAdminInvite = async ({
   const { error } = await supabase.from("admin_invites").insert({
     id: inviteId,
     email: normalizedEmail,
-    role: "admin",
+    role,
     status: "pending",
     invited_by_email: normalizedInvitedByEmail,
     token,
@@ -285,6 +313,7 @@ export const createAdminInvite = async ({
   return {
     id: inviteId,
     email: normalizedEmail,
+    role,
     inviteUrl: `${origin}${getInviteUrl(token)}`,
     expiresAt,
   };
@@ -363,7 +392,7 @@ export const acceptAdminInvite = async ({
   const invite = data as {
     id: string;
     email: string;
-    role: "admin";
+    role: AdminMemberRole | "admin";
     status: AdminInviteStatus;
     expires_at: string;
   };
@@ -392,7 +421,7 @@ export const acceptAdminInvite = async ({
   const memberUpsert = await supabase.from("admin_members").upsert(
     {
       email: normalizedEmail,
-      role: invite.role,
+      role: normalizeAdminRole(invite.role) ?? "admin_sales",
     },
     {
       onConflict: "email",
@@ -412,5 +441,8 @@ export const acceptAdminInvite = async ({
     })
     .eq("id", invite.id);
 
-  return { ok: true, role: invite.role };
+  return {
+    ok: true,
+    role: normalizeAdminRole(invite.role) ?? "admin_sales",
+  };
 };

@@ -156,7 +156,7 @@ export function PromotionsManager({
             Codes promo et offres ciblables
           </h2>
           <p className="mt-3 max-w-2xl text-sm text-[color:var(--muted)]">
-            Le second admin peut lancer des offres generales, par categorie ou
+            L admin ventes peut lancer des offres generales, par categorie ou
             sur un produit precis pour relever les clics et les demandes
             WhatsApp.
           </p>

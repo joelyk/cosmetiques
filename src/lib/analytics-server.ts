@@ -149,7 +149,7 @@ const buildInsights = ({
     return [
       "Le suivi live est actif, mais il n'y a pas encore assez de donnees pour produire un vrai feedback.",
       "Commencez par partager le site et verifier les courbes apres les premiers clics produit et demandes WhatsApp.",
-      "Le second admin pourra ensuite agir sur les images, les promos et les categories les plus sollicitees.",
+      "L admin ventes pourra ensuite agir sur les promos, les messages checkout et les categories les plus sollicitees.",
     ];
   }
 
@@ -191,7 +191,7 @@ const buildInsights = ({
       ? `${lowConversionProduct.productName} genere de l'interet mais convertit moins bien vers WhatsApp. Priorite: image, offre ou promo ciblee.`
       : "Aucun produit ne montre encore un probleme clair de conversion.",
     strongestCategory
-      ? `${categoryMap.get(strongestCategory[0])?.name ?? "Une categorie"} concentre le plus de clics. Le second admin peut y attacher davantage d'offres et de produits.`
+      ? `${categoryMap.get(strongestCategory[0])?.name ?? "Une categorie"} concentre le plus de clics. L admin ventes peut y attacher davantage d offres et de produits.`
       : "Aucune categorie ne se detache encore dans le trafic.",
   ];
 };

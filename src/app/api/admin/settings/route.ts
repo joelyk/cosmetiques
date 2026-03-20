@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import { canAccessAdmin } from "@/lib/roles";
+import { canManageSales } from "@/lib/roles";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 const SettingsSchema = z.object({
@@ -17,7 +17,7 @@ const normalizePhoneNumber = (value: string) => value.replace(/[^\d]/g, "");
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!canAccessAdmin(session?.user?.role ?? "guest")) {
+  if (!canManageSales(session?.user?.role ?? "guest")) {
     return Response.json({ error: "Acces refuse." }, { status: 403 });
   }
 
@@ -69,4 +69,3 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true });
 }
-

@@ -73,7 +73,7 @@ create table if not exists store_settings (
 
 create table if not exists admin_members (
   email text primary key,
-  role text not null default 'admin' check (role in ('admin', 'super_admin')),
+  role text not null default 'admin_sales' check (role in ('admin', 'admin_catalog', 'admin_sales', 'super_admin')),
   invited_by_email text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -82,7 +82,7 @@ create table if not exists admin_members (
 create table if not exists admin_invites (
   id text primary key,
   email text not null,
-  role text not null default 'admin' check (role in ('admin')),
+  role text not null default 'admin_sales' check (role in ('admin', 'admin_catalog', 'admin_sales')),
   status text not null default 'pending' check (status in ('pending', 'accepted', 'revoked', 'expired')),
   invited_by_email text,
   accepted_by_email text,
@@ -156,13 +156,13 @@ alter table store_settings
   add column if not exists updated_at timestamptz not null default now();
 
 alter table admin_members
-  add column if not exists role text not null default 'admin',
+  add column if not exists role text not null default 'admin_sales',
   add column if not exists invited_by_email text,
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
 
 alter table admin_invites
-  add column if not exists role text not null default 'admin',
+  add column if not exists role text not null default 'admin_sales',
   add column if not exists status text not null default 'pending',
   add column if not exists invited_by_email text,
   add column if not exists accepted_by_email text,

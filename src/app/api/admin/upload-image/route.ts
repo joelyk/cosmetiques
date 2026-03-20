@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { auth } from "@/auth";
-import { canAccessAdmin } from "@/lib/roles";
+import { canManageCatalog } from "@/lib/roles";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 const slugify = (value: string) =>
@@ -25,7 +25,7 @@ const BUCKET_NAME = "product-images";
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!canAccessAdmin(session?.user?.role ?? "guest")) {
+  if (!canManageCatalog(session?.user?.role ?? "guest")) {
     return Response.json({ error: "Acces refuse." }, { status: 403 });
   }
 
@@ -103,4 +103,3 @@ export async function POST(request: Request) {
     path: filePath,
   });
 }
-

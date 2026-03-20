@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { getCatalogSnapshot } from "@/lib/catalog-server";
-import { canAccessAdmin } from "@/lib/roles";
+import { canManageCatalog } from "@/lib/roles";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 const ProductSchema = z.object({
@@ -36,7 +36,7 @@ const normalizeOptional = (value?: string) => {
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!canAccessAdmin(session?.user?.role ?? "guest")) {
+  if (!canManageCatalog(session?.user?.role ?? "guest")) {
     return Response.json({ error: "Acces refuse." }, { status: 403 });
   }
 

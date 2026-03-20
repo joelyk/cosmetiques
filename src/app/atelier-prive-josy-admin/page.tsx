@@ -73,11 +73,13 @@ export default async function AdminAccessPage({
           <code className="rounded bg-[color:var(--card-soft)] px-2 py-1 text-[color:var(--ink)]">
             SUPER_ADMIN_EMAILS
           </code>{" "}
-          donne acces au tableau de bord complet.{" "}
+          donne acces complet.{" "}
           <code className="rounded bg-[color:var(--card-soft)] px-2 py-1 text-[color:var(--ink)]">
             ADMIN_EMAILS
           </code>{" "}
-          donne acces au pilotage catalogue, ventes et analytics.
+          donne un acces fixe de type admin ventes. Les admins catalogue et
+          ventes supplementaires peuvent ensuite etre invites par lien depuis le
+          back-office du super admin.
         </p>
       </div>
 

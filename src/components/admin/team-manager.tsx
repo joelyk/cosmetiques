@@ -3,6 +3,7 @@
 import { Copy, MailPlus, Shield, ShieldOff } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { getRoleLabel } from "@/lib/roles";
 import type { AdminInvite, AdminTeamMember } from "@/types/catalog";
 
 const formatDateTime = (value: string | null) => {
@@ -34,6 +35,7 @@ export function TeamManager({
   const [members, setMembers] = useState(initialMembers);
   const [invites, setInvites] = useState(initialInvites);
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<AdminInvite["role"]>("admin_catalog");
   const [status, setStatus] = useState<string | null>(null);
   const [latestInviteUrl, setLatestInviteUrl] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -47,7 +49,7 @@ export function TeamManager({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, role }),
     });
 
     const payload = (await response.json()) as {
@@ -72,7 +74,7 @@ export function TeamManager({
     const nextInvite: AdminInvite = {
       id: payload.id,
       email: payload.email,
-      role: "admin",
+      role,
       status: "pending",
       invitedByEmail: null,
       createdAt: new Date().toISOString(),
@@ -190,6 +192,19 @@ export function TeamManager({
                 />
               </label>
 
+              <label className="field">
+                <span>Role accorde</span>
+                <select
+                  value={role}
+                  onChange={(event) =>
+                    setRole(event.target.value as AdminInvite["role"])
+                  }
+                >
+                  <option value="admin_catalog">Admin catalogue</option>
+                  <option value="admin_sales">Admin ventes</option>
+                </select>
+              </label>
+
               <button
                 type="button"
                 className="btn-primary inline-flex items-center gap-2"
@@ -243,14 +258,14 @@ export function TeamManager({
                     <div>
                       <p className="font-medium">{member.email}</p>
                       <p className="mt-1 text-sm text-[color:var(--muted)]">
-                        Role: {member.role === "super_admin" ? "super admin" : "admin"}
+                        Role: {getRoleLabel(member.role)}
                       </p>
                       <p className="mt-1 text-sm text-[color:var(--muted)]">
                         Source:{" "}
                         {member.source === "env_super_admin"
                           ? "configuration super admin"
                           : member.source === "env_admin"
-                            ? "configuration admin"
+                            ? "configuration admin ventes"
                             : "invitation acceptee"}
                       </p>
                       <p className="mt-1 text-sm text-[color:var(--muted)]">
@@ -295,6 +310,9 @@ export function TeamManager({
                     className="rounded-[22px] border border-[color:var(--line)] bg-[color:var(--background)] px-4 py-4"
                   >
                     <p className="font-medium">{invite.email}</p>
+                    <p className="mt-1 text-sm text-[color:var(--muted)]">
+                      Role invite: {getRoleLabel(invite.role)}
+                    </p>
                     <p className="mt-1 text-sm text-[color:var(--muted)]">
                       Expire le {formatDateTime(invite.expiresAt)}
                     </p>

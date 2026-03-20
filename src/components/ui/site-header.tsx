@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { auth, signOut } from "@/auth";
 import { CartPill } from "@/components/cart/cart-pill";
-import { canAccessAdmin } from "@/lib/roles";
+import { canAccessAdmin, getRoleLabel } from "@/lib/roles";
 
 const navItems = [
   { href: "/", label: "Accueil" },
@@ -13,14 +13,7 @@ const navItems = [
 export async function SiteHeader() {
   const session = await auth();
   const canOpenAdmin = canAccessAdmin(session?.user?.role ?? "guest");
-  const roleLabel =
-    session?.user?.role === "super_admin"
-      ? "Super admin"
-      : session?.user?.role === "admin"
-        ? "Admin"
-        : session?.user
-          ? "Connecte"
-          : null;
+  const roleLabel = session?.user ? getRoleLabel(session.user.role) : null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[color:var(--line)] bg-[color:var(--background)]/90 backdrop-blur-xl">

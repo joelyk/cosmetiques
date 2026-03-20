@@ -9,6 +9,7 @@ import {
 
 const InviteSchema = z.object({
   email: z.email().min(5).max(160),
+  role: z.enum(["admin_catalog", "admin_sales"]),
 });
 
 const RevokeSchema = z.object({
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     const origin = new URL(request.url).origin;
     const result = await createAdminInvite({
       email: payload.data.email,
+      role: payload.data.role,
       invitedByEmail: session.user.email,
       origin,
     });

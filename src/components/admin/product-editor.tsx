@@ -292,8 +292,8 @@ export function ProductEditor({
           </h2>
           <p className="mt-3 max-w-2xl text-sm text-[color:var(--muted)]">
             Mode actuel: {sharedEnabled ? "catalogue partage Supabase" : "brouillon local navigateur"}.
-            Le second admin peut changer la categorie, la marque, les visuels, les offres et
-            le statut produit sans toucher au code.
+            L admin catalogue peut changer la categorie, la marque, les visuels
+            et le statut produit sans toucher au code.
           </p>
           {source === "local" && sharedEnabled ? (
             <p className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">

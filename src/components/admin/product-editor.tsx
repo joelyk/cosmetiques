@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Database, Download, Plus, Save } from "lucide-react";
+import { Database, Download, ImagePlus, Plus, Save } from "lucide-react";
 
 import type { Product, ProductCategory, UserRole } from "@/types/catalog";
 
@@ -43,6 +43,9 @@ const buildNewProduct = (categoryId: string): Product => {
   };
 };
 
+const mergeImageUrls = (existing: string[], incoming: string[]) =>
+  Array.from(new Set([...incoming.filter(Boolean), ...existing.filter(Boolean)]));
+
 export function ProductEditor({
   categories,
   products,
@@ -60,6 +63,8 @@ export function ProductEditor({
   const [selectedId, setSelectedId] = useState(products[0]?.id ?? "");
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isUploadingHero, setIsUploadingHero] = useState(false);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
 
   useEffect(() => {
     if (sharedEnabled) {
@@ -74,7 +79,6 @@ export function ProductEditor({
     try {
       const parsed = JSON.parse(rawValue) as Product[];
       if (parsed.length > 0) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraftProducts(parsed);
         setSelectedId(parsed[0]?.id ?? "");
       }
@@ -93,6 +97,14 @@ export function ProductEditor({
     setDraftProducts((current) =>
       current.map((product) =>
         product.id === selectedId ? { ...product, [field]: value } : product,
+      ),
+    );
+  };
+
+  const patchSelectedProduct = (patch: Partial<Product>) => {
+    setDraftProducts((current) =>
+      current.map((product) =>
+        product.id === selectedId ? { ...product, ...patch } : product,
       ),
     );
   };
@@ -182,6 +194,88 @@ export function ProductEditor({
     setStatus(
       `Supabase initialise avec ${payload.counts?.products ?? 0} produits. Recharge la page pour passer en mode partage.`,
     );
+  };
+
+  const uploadImageFile = async (file: File, variant: "hero" | "gallery") => {
+    const formData = new FormData();
+    formData.set("file", file);
+    formData.set("productName", selectedProduct.name);
+    formData.set("variant", variant);
+
+    const response = await fetch("/api/admin/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    const payload = (await response.json()) as {
+      error?: string;
+      url?: string;
+    };
+
+    if (!response.ok || !payload.url) {
+      throw new Error(payload.error ?? "Impossible de charger cette image.");
+    }
+
+    return payload.url;
+  };
+
+  const handleHeroImageUpload = async (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    setStatus(null);
+    setIsUploadingHero(true);
+
+    try {
+      const nextUrl = await uploadImageFile(file, "hero");
+      patchSelectedProduct({
+        heroImage: nextUrl,
+        gallery: mergeImageUrls(
+          selectedProduct.gallery.filter((entry) => entry !== selectedProduct.heroImage),
+          [nextUrl],
+        ),
+      });
+      setStatus("Image principale chargee depuis le PC et liee au produit.");
+    } catch (error) {
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : "Impossible de charger l image principale.",
+      );
+    } finally {
+      setIsUploadingHero(false);
+    }
+  };
+
+  const handleGalleryUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setStatus(null);
+    setIsUploadingGallery(true);
+
+    try {
+      const uploadedUrls: string[] = [];
+
+      for (const file of Array.from(files).slice(0, 6)) {
+        uploadedUrls.push(await uploadImageFile(file, "gallery"));
+      }
+
+      patchSelectedProduct({
+        gallery: mergeImageUrls(selectedProduct.gallery, uploadedUrls),
+      });
+      setStatus(`${uploadedUrls.length} image(s) galerie chargee(s) depuis le PC.`);
+    } catch (error) {
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : "Impossible de charger les images galerie.",
+      );
+    } finally {
+      setIsUploadingGallery(false);
+    }
   };
 
   if (!selectedProduct) {
@@ -386,13 +480,26 @@ export function ProductEditor({
               }
             />
           </label>
-          <label className="field">
+          <div className="field">
             <span>Image principale</span>
             <input
               value={selectedProduct.heroImage}
               onChange={(event) => updateProduct("heroImage", event.target.value)}
             />
-          </label>
+            <label className="chip mt-2 inline-flex cursor-pointer items-center gap-2">
+              <ImagePlus className="h-4 w-4" />
+              {isUploadingHero ? "Chargement..." : "Charger depuis mon PC"}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                disabled={isUploadingHero}
+                onChange={(event) =>
+                  void handleHeroImageUpload(event.target.files?.[0] ?? null)
+                }
+              />
+            </label>
+          </div>
           <label className="field">
             <span>Statut</span>
             <select
@@ -425,7 +532,7 @@ export function ProductEditor({
               placeholder="parfum, best-seller, cadeau"
             />
           </label>
-          <label className="field sm:col-span-2">
+          <div className="field sm:col-span-2">
             <span>Galerie image (une URL par ligne)</span>
             <textarea
               rows={4}
@@ -440,7 +547,21 @@ export function ProductEditor({
                 )
               }
             />
-          </label>
+            <label className="chip mt-2 inline-flex cursor-pointer items-center gap-2">
+              <ImagePlus className="h-4 w-4" />
+              {isUploadingGallery ? "Chargement..." : "Ajouter depuis mon PC"}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                multiple
+                className="hidden"
+                disabled={isUploadingGallery}
+                onChange={(event) =>
+                  void handleGalleryUpload(event.target.files)
+                }
+              />
+            </label>
+          </div>
           <label className="field sm:col-span-2">
             <span>Resume court</span>
             <textarea

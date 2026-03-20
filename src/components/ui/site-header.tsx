@@ -79,11 +79,7 @@ export async function SiteHeader() {
                 </button>
               </form>
             </>
-          ) : (
-            <Link href="/login" className="btn-secondary">
-              Connexion
-            </Link>
-          )}
+          ) : null}
         </div>
       </div>
     </header>

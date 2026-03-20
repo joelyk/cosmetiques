@@ -6,7 +6,7 @@ import { MessageCircleMore } from "lucide-react";
 import { useCart } from "@/components/providers/cart-provider";
 import { buildProductMap } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
-import type { Product } from "@/types/catalog";
+import type { Product, StoreSettings } from "@/types/catalog";
 
 type CheckoutState = {
   customerName: string;
@@ -24,7 +24,13 @@ const defaultState: CheckoutState = {
   notes: "",
 };
 
-export function CheckoutClient({ products }: { products: Product[] }) {
+export function CheckoutClient({
+  products,
+  settings,
+}: {
+  products: Product[];
+  settings: StoreSettings;
+}) {
   const { items } = useCart();
   const productMap = buildProductMap(products);
   const [formState, setFormState] = useState(defaultState);
@@ -104,10 +110,7 @@ export function CheckoutClient({ products }: { products: Product[] }) {
               Finaliser sur WhatsApp en toute confiance
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-[color:var(--muted)]">
-              Le site prepare un message securise cote serveur avec les bons
-              produits et le bon numero WhatsApp Josy Cosmetics. Le client echange
-              ensuite directement avec notre equipe pour confirmer Mobile Money
-              ou Orange Money.
+              {settings.checkoutDescription}
             </p>
           </div>
 
@@ -198,7 +201,7 @@ export function CheckoutClient({ products }: { products: Product[] }) {
             onClick={handleSubmit}
           >
             <MessageCircleMore className="h-4 w-4" />
-            {isPending ? "Preparation du message..." : "Payer via WhatsApp"}
+            {isPending ? "Preparation du message..." : settings.whatsappButtonLabel}
           </button>
         </div>
       </section>
@@ -228,10 +231,7 @@ export function CheckoutClient({ products }: { products: Product[] }) {
         </div>
 
         <p className="mt-4 text-sm text-[color:var(--muted)]">
-          Texte propose au client: &quot;Apres validation, vous serez redirige
-          vers notre WhatsApp officiel pour confirmer votre commande, recevoir
-          les instructions Mobile Money ou Orange Money, et echanger en toute
-          confiance avec notre equipe.&quot;
+          {settings.checkoutTrustNote}
         </p>
       </aside>
     </div>

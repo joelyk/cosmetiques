@@ -7,9 +7,9 @@ export function SiteFooter() {
         <div>
           <p className="eyebrow">Josy Cosmetics</p>
           <p className="mt-3 max-w-sm text-sm text-[color:var(--muted)]">
-            Boutique e-commerce concue avec Next.js, React, Supabase et Vercel
-            pour lancer les parfums maintenant puis etendre facilement vers
-            gels douche, laits corporels et coffrets.
+            Boutique pensee pour mettre en valeur les parfums, faciliter les
+            commandes et accompagner l evolution du catalogue vers les gels
+            douche, laits corporels et coffrets.
           </p>
           <p className="mt-4 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
             Fait par GeniusClassrooms
@@ -23,7 +23,7 @@ export function SiteFooter() {
             <Link href="/">Accueil</Link>
             <Link href="/catalog">Catalogue</Link>
             <Link href="/cart">Panier</Link>
-            <Link href="/login">Connexion</Link>
+            <Link href="/checkout">Commander</Link>
           </div>
         </div>
         <div>

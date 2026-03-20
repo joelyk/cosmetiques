@@ -4,6 +4,7 @@ import {
   products as starterProducts,
   promotions as starterPromotions,
 } from "@/data/catalog";
+import { env } from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export async function POST() {
@@ -116,6 +117,29 @@ export async function POST() {
   if (promotionInsert.error) {
     return Response.json(
       { error: "Impossible d'initialiser les promotions." },
+      { status: 500 },
+    );
+  }
+
+  const settingsInsert = await supabase.from("store_settings").upsert(
+    {
+      id: "main",
+      store_name: "Josy Cosmetics",
+      whatsapp_order_number: env.whatsappOrderNumber,
+      checkout_description:
+        "Le site prepare une demande claire vers le WhatsApp officiel de la boutique pour confirmer la commande, le mode de paiement et la livraison.",
+      checkout_trust_note:
+        "Apres validation, vous serez redirige vers notre WhatsApp officiel pour confirmer votre commande et recevoir les instructions Mobile Money ou Orange Money.",
+      whatsapp_button_label: "Payer via WhatsApp",
+    },
+    {
+      onConflict: "id",
+    },
+  );
+
+  if (settingsInsert.error) {
+    return Response.json(
+      { error: "Impossible d'initialiser les reglages boutique." },
       { status: 500 },
     );
   }

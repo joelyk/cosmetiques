@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import { getCatalogSnapshot } from "@/lib/catalog-server";
-import { env } from "@/lib/env";
-import { buildOrderLines, buildWhatsAppOrderMessage } from "@/lib/whatsapp";
 import { createSupabaseAdminClient } from "@/lib/supabase";
+import { getStoreSettings } from "@/lib/store-settings";
+import { buildOrderLines, buildWhatsAppOrderMessage } from "@/lib/whatsapp";
 
 const CheckoutSchema = z.object({
   items: z
@@ -25,17 +25,24 @@ export async function POST(request: Request) {
   const payload = CheckoutSchema.safeParse(await request.json());
 
   if (!payload.success) {
-    return Response.json({ error: "Les informations de commande sont incomplètes." }, { status: 400 });
+    return Response.json(
+      { error: "Les informations de commande sont incompletes." },
+      { status: 400 },
+    );
   }
 
   const { products, categories } = await getCatalogSnapshot();
+  const { settings } = await getStoreSettings();
   const orderLines = buildOrderLines({
     items: payload.data.items,
     products,
   });
 
   if (orderLines.length !== payload.data.items.length) {
-    return Response.json({ error: "Un produit du panier est invalide." }, { status: 400 });
+    return Response.json(
+      { error: "Un produit du panier est invalide." },
+      { status: 400 },
+    );
   }
 
   const whatsappMessage = buildWhatsAppOrderMessage({
@@ -43,8 +50,9 @@ export async function POST(request: Request) {
     details: payload.data,
     products,
     categories,
+    storeName: settings.storeName,
   });
-  const url = `https://wa.me/${env.whatsappOrderNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+  const url = `https://wa.me/${settings.whatsappOrderNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   const supabase = createSupabaseAdminClient();
 
@@ -65,3 +73,4 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true, url });
 }
+

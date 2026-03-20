@@ -66,3 +66,11 @@ export type Promotion = {
   productId?: string;
   isActive: boolean;
 };
+
+export type StoreSettings = {
+  storeName: string;
+  whatsappOrderNumber: string;
+  checkoutDescription: string;
+  checkoutTrustNote: string;
+  whatsappButtonLabel: string;
+};

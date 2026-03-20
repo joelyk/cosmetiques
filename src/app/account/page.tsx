@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 
 import { auth, signOut } from "@/auth";
 import { AccountProfileForm } from "@/components/account/account-profile-form";
+import { getAdminEntryPath } from "@/lib/admin-entry";
 import { canAccessAdmin } from "@/lib/roles";
 
 export default async function AccountPage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login?next=/account");
+    redirect(getAdminEntryPath({ next: "/account" }));
   }
 
   const canOpenAdmin = canAccessAdmin(session.user.role);

@@ -5,17 +5,27 @@ import { DashboardCharts } from "@/components/admin/dashboard-charts";
 import { ImageStudio } from "@/components/admin/image-studio";
 import { ProductEditor } from "@/components/admin/product-editor";
 import { PromotionsManager } from "@/components/admin/promotions-manager";
+import { StoreSettingsPanel } from "@/components/admin/store-settings-panel";
+import { getAdminEntryPath } from "@/lib/admin-entry";
 import { getDashboardData } from "@/lib/analytics-server";
 import { getCatalogSnapshot } from "@/lib/catalog-server";
 import { env } from "@/lib/env";
 import { canAccessAdmin } from "@/lib/roles";
+import { getStoreSettings } from "@/lib/store-settings";
+
+export const metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function AdminPage() {
   const session = await auth();
   const role = session?.user?.role ?? "guest";
 
   if (!session?.user) {
-    redirect("/login?next=/admin");
+    redirect(getAdminEntryPath({ next: "/admin" }));
   }
 
   if (!canAccessAdmin(role)) {
@@ -23,6 +33,7 @@ export default async function AdminPage() {
   }
 
   const catalogSnapshot = await getCatalogSnapshot();
+  const storeSettingsSnapshot = await getStoreSettings();
   const dashboardData = await getDashboardData({
     products: catalogSnapshot.products,
     categories: catalogSnapshot.categories,
@@ -57,6 +68,9 @@ export default async function AdminPage() {
           <span className="chip">
             Edition partagee: {env.hasSupabaseAdmin ? "active" : "a configurer"}
           </span>
+          <span className="chip">
+            WhatsApp vente: {storeSettingsSnapshot.settings.whatsappOrderNumber}
+          </span>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -87,6 +101,39 @@ export default async function AdminPage() {
         role={role}
       />
 
+      <section className="panel p-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow">Lecture rapide</p>
+            <h2 className="mt-2 text-2xl font-semibold">
+              Produits les plus cliques et demandes
+            </h2>
+          </div>
+          <p className="text-sm text-[color:var(--muted)]">
+            Vue utile pour savoir quels articles pousser, retoucher ou promouvoir.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          {dashboardData.performance.map((item, index) => (
+            <article
+              key={item.productId}
+              className="rounded-[28px] border border-[color:var(--line)] bg-white p-5"
+            >
+              <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
+                Top {index + 1}
+              </p>
+              <h3 className="mt-3 text-xl font-semibold">{item.productName}</h3>
+              <div className="mt-4 space-y-2 text-sm text-[color:var(--muted)]">
+                <p>Clics produit: {item.clicks}</p>
+                <p>Demandes WhatsApp: {item.checkoutRequests}</p>
+                <p>Note moyenne: {item.rating.toFixed(1)}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-3">
         {dashboardData.insights.map((insight) => (
           <article key={insight} className="panel p-5">
@@ -111,6 +158,12 @@ export default async function AdminPage() {
         products={catalogSnapshot.products}
         promotions={catalogSnapshot.promotions}
         sharedEnabled={env.hasSupabaseAdmin}
+      />
+
+      <StoreSettingsPanel
+        initialSettings={storeSettingsSnapshot.settings}
+        sharedEnabled={env.hasSupabaseAdmin}
+        source={storeSettingsSnapshot.source}
       />
 
       <ImageStudio />

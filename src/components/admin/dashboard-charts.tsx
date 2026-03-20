@@ -60,7 +60,7 @@ export function DashboardCharts({
         <div className="mb-4">
           <p className="eyebrow">Produits marquants</p>
           <h2 className="mt-2 text-xl font-semibold">
-            Produits à surveiller côté admin
+            Produits a surveiller cote admin
           </h2>
         </div>
         <div className="h-72">
@@ -85,3 +85,4 @@ export function DashboardCharts({
     </div>
   );
 }
+

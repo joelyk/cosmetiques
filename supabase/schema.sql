@@ -60,6 +60,17 @@ create table if not exists promotions (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists store_settings (
+  id text primary key,
+  store_name text not null,
+  whatsapp_order_number text not null,
+  checkout_description text not null,
+  checkout_trust_note text not null,
+  whatsapp_button_label text not null default 'Payer via WhatsApp',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists page_visit_events (
   id bigint generated always as identity primary key,
   pathname text not null,
@@ -113,6 +124,15 @@ alter table promotions
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
 
+alter table store_settings
+  add column if not exists store_name text not null default 'Josy Cosmetics',
+  add column if not exists whatsapp_order_number text not null default '237600000000',
+  add column if not exists checkout_description text not null default 'Le site prepare une demande claire vers le WhatsApp officiel de la boutique pour confirmer la commande, le mode de paiement et la livraison.',
+  add column if not exists checkout_trust_note text not null default 'Apres validation, vous serez redirige vers notre WhatsApp officiel pour confirmer votre commande et recevoir les instructions Mobile Money ou Orange Money.',
+  add column if not exists whatsapp_button_label text not null default 'Payer via WhatsApp',
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
 alter table checkout_requests
   add column if not exists items jsonb not null default '[]'::jsonb;
 
@@ -145,9 +165,16 @@ before update on promotions
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists set_store_settings_updated_at on store_settings;
+create trigger set_store_settings_updated_at
+before update on store_settings
+for each row
+execute function public.set_updated_at();
+
 alter table catalog_categories enable row level security;
 alter table catalog_products enable row level security;
 alter table promotions enable row level security;
+alter table store_settings enable row level security;
 alter table page_visit_events enable row level security;
 alter table product_click_events enable row level security;
 alter table checkout_requests enable row level security;
@@ -172,3 +199,10 @@ on promotions
 for select
 to anon
 using (is_active = true);
+
+drop policy if exists "Allow public read on store settings" on store_settings;
+create policy "Allow public read on store settings"
+on store_settings
+for select
+to anon
+using (true);

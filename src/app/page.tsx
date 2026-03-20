@@ -27,16 +27,16 @@ export default async function HomePage() {
               une ligne cosmetique demain.
             </h1>
             <p className="mt-5 max-w-xl text-base text-[color:var(--muted)] md:text-lg">
-              Josy Cosmetics demarre avec les parfums, mais la structure catalogue,
-              administration et analytics est deja prete pour les gels douche,
-              laits corporels, coffrets et futures categories.
+              Josy Cosmetics demarre avec les parfums, tout en gardant une
+              boutique souple pour accueillir ensuite les gels douche, les
+              laits corporels, les coffrets et d autres gammes.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/catalog" className="btn-primary">
                 Explorer les produits
               </Link>
-              <Link href="/admin" className="btn-secondary">
-                Voir espace admin
+              <Link href="/checkout" className="btn-secondary">
+                Commander en quelques etapes
               </Link>
             </div>
             <p className="mt-4 text-xs uppercase tracking-[0.24em] text-[color:var(--muted)]">
@@ -57,12 +57,12 @@ export default async function HomePage() {
             </div>
             <div className="panel bg-white/75 p-5">
               <p className="text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                Deux roles admin
+                Commande guidee
               </p>
-              <p className="mt-4 text-3xl font-semibold">Email magic link</p>
+              <p className="mt-4 text-3xl font-semibold">Panier puis confirmation</p>
               <p className="mt-3 text-sm text-[color:var(--muted)]">
-                Connexion par lien email et roles admin pilotes par liste
-                d&apos;emails, sans mot de passe local.
+                La cliente choisit ses articles, verifie son panier puis
+                finalise simplement la commande avec l equipe.
               </p>
             </div>
             <div className="panel bg-white/75 p-5 sm:col-span-2">
@@ -90,16 +90,14 @@ export default async function HomePage() {
       {activePromotions.length > 0 ? (
         <section className="space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow">Promotions actives</p>
-              <h2 className="mt-2 text-3xl font-semibold">
-                Codes promo pilotables par le second admin
-              </h2>
-            </div>
-            <Link href="/admin" className="chip">
-              Gerer les offres
-            </Link>
+          <div>
+            <p className="eyebrow">Promotions actives</p>
+            <h2 className="mt-2 text-3xl font-semibold">Offres du moment</h2>
           </div>
+          <Link href="/catalog" className="chip">
+            Voir les produits concernes
+          </Link>
+        </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {activePromotions.map((promotion) => (
               <article key={promotion.id} className="panel p-5">

@@ -49,18 +49,20 @@ export const buildWhatsAppOrderMessage = ({
   details,
   products,
   categories,
+  storeName = "Josy Cosmetics",
 }: {
   items: CartItem[];
   details: CheckoutDetails;
   products: Product[];
   categories: ProductCategory[];
+  storeName?: string;
 }) => {
   const lines = buildOrderLines({ items, products });
   const categoryMap = buildCategoryMap(categories);
   const totalCents = lines.reduce((sum, line) => sum + line.lineTotalCents, 0);
 
   return [
-    "Bonjour Josy Cosmetics,",
+    `Bonjour ${storeName},`,
     "",
     "Je souhaite confirmer cette commande :",
     `Client : ${details.customerName}`,

@@ -5,7 +5,17 @@ import { useState, useTransition } from "react";
 
 import { createSupabaseBrowserAuthClient } from "@/lib/supabase-auth-browser";
 
-export function EmailLoginForm({ nextPath }: { nextPath: string }) {
+export function EmailLoginForm({
+  nextPath,
+  submitLabel = "Recevoir un lien par email",
+  successMessage = "Le lien de connexion a ete envoye. Ouvre ton email puis clique sur le lien pour entrer sur le site.",
+  helperText = "Pas de mot de passe local. Le client recoit simplement un lien de connexion sur son email.",
+}: {
+  nextPath: string;
+  submitLabel?: string;
+  successMessage?: string;
+  helperText?: string;
+}) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -35,9 +45,7 @@ export function EmailLoginForm({ nextPath }: { nextPath: string }) {
           return;
         }
 
-        setStatus(
-          "Le lien de connexion a ete envoye. Ouvre ton email puis clique sur le lien pour entrer sur le site.",
-        );
+        setStatus(successMessage);
         setEmail(nextEmail);
       } catch {
         setError(
@@ -86,13 +94,10 @@ export function EmailLoginForm({ nextPath }: { nextPath: string }) {
         disabled={isPending}
       >
         <MailCheck className="h-4 w-4" />
-        {isPending ? "Envoi du lien..." : "Recevoir un lien par email"}
+        {isPending ? "Envoi du lien..." : submitLabel}
       </button>
 
-      <p className="text-sm text-[color:var(--muted)]">
-        Pas de mot de passe local. Le client recoit simplement un lien de
-        connexion sur son email.
-      </p>
+      <p className="text-sm text-[color:var(--muted)]">{helperText}</p>
     </form>
   );
 }

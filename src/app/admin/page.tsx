@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 import { auth } from "@/auth";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
@@ -6,7 +7,9 @@ import { ImageStudio } from "@/components/admin/image-studio";
 import { ProductEditor } from "@/components/admin/product-editor";
 import { PromotionsManager } from "@/components/admin/promotions-manager";
 import { StoreSettingsPanel } from "@/components/admin/store-settings-panel";
+import { TeamManager } from "@/components/admin/team-manager";
 import { getAdminEntryPath } from "@/lib/admin-entry";
+import { canManageAdminTeam, getAdminTeamSnapshot } from "@/lib/admin-team";
 import { getDashboardData } from "@/lib/analytics-server";
 import { getCatalogSnapshot } from "@/lib/catalog-server";
 import { env } from "@/lib/env";
@@ -34,6 +37,15 @@ export default async function AdminPage() {
 
   const catalogSnapshot = await getCatalogSnapshot();
   const storeSettingsSnapshot = await getStoreSettings();
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const protocol =
+    requestHeaders.get("x-forwarded-proto") ??
+    (host?.includes("localhost") ? "http" : "https");
+  const origin = host ? `${protocol}://${host}` : "http://localhost:3000";
+  const adminTeamSnapshot = canManageAdminTeam(role)
+    ? await getAdminTeamSnapshot({ origin })
+    : null;
   const dashboardData = await getDashboardData({
     products: catalogSnapshot.products,
     categories: catalogSnapshot.categories,
@@ -144,6 +156,14 @@ export default async function AdminPage() {
           </article>
         ))}
       </section>
+
+      {adminTeamSnapshot ? (
+        <TeamManager
+          initialMembers={adminTeamSnapshot.members}
+          initialInvites={adminTeamSnapshot.invites}
+          sharedEnabled={adminTeamSnapshot.sharedEnabled}
+        />
+      ) : null}
 
       <ProductEditor
         categories={catalogSnapshot.categories}

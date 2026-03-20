@@ -71,6 +71,28 @@ create table if not exists store_settings (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists admin_members (
+  email text primary key,
+  role text not null default 'admin' check (role in ('admin', 'super_admin')),
+  invited_by_email text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists admin_invites (
+  id text primary key,
+  email text not null,
+  role text not null default 'admin' check (role in ('admin')),
+  status text not null default 'pending' check (status in ('pending', 'accepted', 'revoked', 'expired')),
+  invited_by_email text,
+  accepted_by_email text,
+  token text not null unique,
+  expires_at timestamptz not null,
+  accepted_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists page_visit_events (
   id bigint generated always as identity primary key,
   pathname text not null,
@@ -133,6 +155,23 @@ alter table store_settings
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
 
+alter table admin_members
+  add column if not exists role text not null default 'admin',
+  add column if not exists invited_by_email text,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
+alter table admin_invites
+  add column if not exists role text not null default 'admin',
+  add column if not exists status text not null default 'pending',
+  add column if not exists invited_by_email text,
+  add column if not exists accepted_by_email text,
+  add column if not exists token text,
+  add column if not exists expires_at timestamptz not null default (now() + interval '7 days'),
+  add column if not exists accepted_at timestamptz,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
 alter table checkout_requests
   add column if not exists items jsonb not null default '[]'::jsonb;
 
@@ -146,6 +185,10 @@ create index if not exists idx_product_click_events_created_at
   on product_click_events(created_at);
 create index if not exists idx_checkout_requests_created_at
   on checkout_requests(created_at);
+create unique index if not exists idx_admin_invites_token
+  on admin_invites(token);
+create index if not exists idx_admin_invites_email_status
+  on admin_invites(email, status);
 
 drop trigger if exists set_catalog_categories_updated_at on catalog_categories;
 create trigger set_catalog_categories_updated_at
@@ -171,10 +214,24 @@ before update on store_settings
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists set_admin_members_updated_at on admin_members;
+create trigger set_admin_members_updated_at
+before update on admin_members
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists set_admin_invites_updated_at on admin_invites;
+create trigger set_admin_invites_updated_at
+before update on admin_invites
+for each row
+execute function public.set_updated_at();
+
 alter table catalog_categories enable row level security;
 alter table catalog_products enable row level security;
 alter table promotions enable row level security;
 alter table store_settings enable row level security;
+alter table admin_members enable row level security;
+alter table admin_invites enable row level security;
 alter table page_visit_events enable row level security;
 alter table product_click_events enable row level security;
 alter table checkout_requests enable row level security;

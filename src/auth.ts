@@ -2,7 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getUserRole } from "@/lib/roles";
+import { getUserRole } from "@/lib/admin-team";
 import { createSupabaseServerAuthClient } from "@/lib/supabase-auth-server";
 import type { UserRole } from "@/types/catalog";
 
@@ -43,12 +43,14 @@ export async function auth(): Promise<AppSession | null> {
       return null;
     }
 
+    const role = await getUserRole(user.email);
+
     return {
       user: {
         id: user.id,
         email: user.email ?? null,
         name: getDisplayName(user),
-        role: getUserRole(user.email),
+        role,
         emailConfirmedAt: user.email_confirmed_at ?? null,
         lastSignInAt: user.last_sign_in_at ?? null,
       },

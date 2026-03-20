@@ -74,3 +74,31 @@ export type StoreSettings = {
   checkoutTrustNote: string;
   whatsappButtonLabel: string;
 };
+
+export type AdminInviteStatus =
+  | "pending"
+  | "accepted"
+  | "revoked"
+  | "expired";
+
+export type AdminMemberRole = "admin" | "super_admin";
+
+export type AdminTeamMember = {
+  email: string;
+  role: AdminMemberRole;
+  source: "env_super_admin" | "env_admin" | "database";
+  createdAt: string | null;
+  invitedByEmail: string | null;
+  canRevoke: boolean;
+};
+
+export type AdminInvite = {
+  id: string;
+  email: string;
+  role: "admin";
+  status: AdminInviteStatus;
+  invitedByEmail: string | null;
+  createdAt: string;
+  expiresAt: string;
+  inviteUrl: string;
+};

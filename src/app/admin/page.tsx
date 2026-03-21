@@ -9,14 +9,16 @@ import { PromotionsManager } from "@/components/admin/promotions-manager";
 import { StoreSettingsPanel } from "@/components/admin/store-settings-panel";
 import { TeamManager } from "@/components/admin/team-manager";
 import { getAdminEntryPath } from "@/lib/admin-entry";
-import { canManageAdminTeam, getAdminTeamSnapshot } from "@/lib/admin-team";
+import { getAdminTeamSnapshot } from "@/lib/admin-team";
 import { getDashboardData } from "@/lib/analytics-server";
 import { getCatalogSnapshot } from "@/lib/catalog-server";
 import { env } from "@/lib/env";
 import {
   canAccessAdmin,
+  canInviteAdmins,
   canManageCatalog,
   canManageSales,
+  canRevokeAdmins,
   canViewAnalytics,
   getRoleLabel,
 } from "@/lib/roles";
@@ -46,6 +48,8 @@ export default async function AdminPage() {
   const canEditCatalog = canManageCatalog(role);
   const canEditSales = canManageSales(role);
   const canSeeAnalytics = canViewAnalytics(role);
+  const canManageTeam = canInviteAdmins(role);
+  const canRevokeTeamMembers = canRevokeAdmins(role);
   const activeProducts = catalogSnapshot.products.filter(
     (product) => product.status === "active",
   ).length;
@@ -58,7 +62,7 @@ export default async function AdminPage() {
     requestHeaders.get("x-forwarded-proto") ??
     (host?.includes("localhost") ? "http" : "https");
   const origin = host ? `${protocol}://${host}` : "http://localhost:3000";
-  const adminTeamSnapshot = canManageAdminTeam(role)
+  const adminTeamSnapshot = canManageTeam
     ? await getAdminTeamSnapshot({ origin })
     : null;
   const dashboardData = await getDashboardData({
@@ -76,6 +80,8 @@ export default async function AdminPage() {
         <p className="mt-4 max-w-3xl text-sm text-[color:var(--muted)]">
           {role === "super_admin"
             ? "Le super admin voit l ensemble du site, gere l equipe admin, le catalogue, les ventes et les reglages critiques."
+            : role === "admin_manager"
+              ? "Cet espace permet de piloter le catalogue, les ventes, les analytics et les invitations admin, sans pouvoir retirer un autre admin actif."
             : role === "admin_catalog"
               ? "Cet espace est centre sur les fiches produit, les visuels, les categories et la qualite du catalogue."
               : "Cet espace est centre sur les ventes, les promotions, les reglages checkout et les performances du site."}
@@ -193,6 +199,7 @@ export default async function AdminPage() {
           initialMembers={adminTeamSnapshot.members}
           initialInvites={adminTeamSnapshot.invites}
           sharedEnabled={adminTeamSnapshot.sharedEnabled}
+          canRevokeMembers={canRevokeTeamMembers}
         />
       ) : null}
 

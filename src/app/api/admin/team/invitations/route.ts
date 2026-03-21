@@ -6,10 +6,11 @@ import {
   createAdminInvite,
   revokeAdminInvite,
 } from "@/lib/admin-team";
+import { canInviteAdmins } from "@/lib/roles";
 
 const InviteSchema = z.object({
   email: z.email().min(5).max(160),
-  role: z.enum(["admin_catalog", "admin_sales"]),
+  role: z.enum(["admin_catalog", "admin_sales", "admin_manager"]),
 });
 
 const RevokeSchema = z.object({
@@ -19,8 +20,11 @@ const RevokeSchema = z.object({
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!canManageAdminTeam(session?.user?.role ?? "guest")) {
-    return Response.json({ error: "Acces reserve au super admin." }, { status: 403 });
+  if (!canInviteAdmins(session?.user?.role ?? "guest")) {
+    return Response.json(
+      { error: "Acces reserve au super admin ou a l admin manager." },
+      { status: 403 },
+    );
   }
 
   const payload = InviteSchema.safeParse(await request.json());
@@ -58,7 +62,10 @@ export async function DELETE(request: Request) {
   const session = await auth();
 
   if (!canManageAdminTeam(session?.user?.role ?? "guest")) {
-    return Response.json({ error: "Acces reserve au super admin." }, { status: 403 });
+    return Response.json(
+      { error: "Acces reserve au super admin ou a l admin manager." },
+      { status: 403 },
+    );
   }
 
   const payload = RevokeSchema.safeParse(await request.json());

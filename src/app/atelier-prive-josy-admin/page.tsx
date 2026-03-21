@@ -77,9 +77,9 @@ export default async function AdminAccessPage({
           <code className="rounded bg-[color:var(--card-soft)] px-2 py-1 text-[color:var(--ink)]">
             ADMIN_EMAILS
           </code>{" "}
-          donne un acces fixe de type admin ventes. Les admins catalogue et
-          ventes supplementaires peuvent ensuite etre invites par lien depuis le
-          back-office du super admin.
+          donne un acces fixe de type admin ventes. Les admins catalogue,
+          ventes et manager supplementaires peuvent ensuite etre invites par
+          lien depuis le back-office prive.
         </p>
       </div>
 

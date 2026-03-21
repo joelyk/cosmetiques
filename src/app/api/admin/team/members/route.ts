@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import { canManageAdminTeam, revokeAdminMember } from "@/lib/admin-team";
+import { revokeAdminMember } from "@/lib/admin-team";
+import { canRevokeAdmins } from "@/lib/roles";
 
 const RevokeMemberSchema = z.object({
   email: z.email().min(5).max(160),
@@ -10,7 +11,7 @@ const RevokeMemberSchema = z.object({
 export async function DELETE(request: Request) {
   const session = await auth();
 
-  if (!canManageAdminTeam(session?.user?.role ?? "guest")) {
+  if (!canRevokeAdmins(session?.user?.role ?? "guest")) {
     return Response.json({ error: "Acces reserve au super admin." }, { status: 403 });
   }
 
@@ -34,4 +35,3 @@ export async function DELETE(request: Request) {
     );
   }
 }
-

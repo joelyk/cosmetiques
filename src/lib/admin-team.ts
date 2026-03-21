@@ -3,6 +3,7 @@ import "server-only";
 import { randomBytes, randomUUID } from "node:crypto";
 
 import { env } from "@/lib/env";
+import { canInviteAdmins } from "@/lib/roles";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import type {
   AdminInvite,
@@ -65,14 +66,22 @@ const normalizeInviteRole = (
 ): AdminInvite["role"] => {
   const normalizedRole = normalizeAdminRole(role);
 
-  return normalizedRole === "admin_catalog" ? "admin_catalog" : "admin_sales";
+  if (normalizedRole === "admin_catalog") {
+    return "admin_catalog";
+  }
+
+  if (normalizedRole === "admin_manager") {
+    return "admin_manager";
+  }
+
+  return "admin_sales";
 };
 
 const inviteLifetimeInDays = 7;
 
 const getInviteUrl = (token: string) => `/invitation-admin?token=${token}`;
 
-export const canManageAdminTeam = (role: UserRole) => role === "super_admin";
+export const canManageAdminTeam = (role: UserRole) => canInviteAdmins(role);
 
 const getDatabaseAdminRole = async (email?: string | null) => {
   const normalized = normalizeEmail(email);
@@ -119,7 +128,11 @@ export const getUserRole = async (email?: string | null): Promise<UserRole> => {
     return "super_admin";
   }
 
-  if (databaseRole === "admin_catalog" || databaseRole === "admin_sales") {
+  if (
+    databaseRole === "admin_catalog" ||
+    databaseRole === "admin_sales" ||
+    databaseRole === "admin_manager"
+  ) {
     return databaseRole;
   }
 
@@ -279,6 +292,7 @@ export const createAdminInvite = async ({
   if (
     currentRole === "admin_catalog" ||
     currentRole === "admin_sales" ||
+    currentRole === "admin_manager" ||
     currentRole === "super_admin"
   ) {
     throw new Error("Cet email dispose deja d un acces admin.");

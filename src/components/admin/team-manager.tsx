@@ -27,10 +27,12 @@ export function TeamManager({
   initialMembers,
   initialInvites,
   sharedEnabled,
+  canRevokeMembers,
 }: {
   initialMembers: AdminTeamMember[];
   initialInvites: AdminInvite[];
   sharedEnabled: boolean;
+  canRevokeMembers: boolean;
 }) {
   const [members, setMembers] = useState(initialMembers);
   const [invites, setInvites] = useState(initialInvites);
@@ -157,10 +159,11 @@ export function TeamManager({
             Inviter, copier le lien et retirer un acces
           </h2>
           <p className="mt-3 max-w-3xl text-sm text-[color:var(--muted)]">
-            Le super admin peut creer un lien d invitation reserve a une adresse
-            email precise. Une fois le lien valide, le nouvel admin accede au
-            back-office et peut gerer les produits, promotions, images et autres
-            operations CRUD du site.
+            Le super admin et l admin manager peuvent creer un lien d invitation
+            reserve a une adresse email precise. Une fois le lien valide, le
+            nouvel admin accede au back-office et peut gerer les produits,
+            promotions, images et autres operations CRUD du site. Seul le super
+            admin peut retirer un admin deja actif.
           </p>
         </div>
         <span className="chip">
@@ -202,6 +205,7 @@ export function TeamManager({
                 >
                   <option value="admin_catalog">Admin catalogue</option>
                   <option value="admin_sales">Admin ventes</option>
+                  <option value="admin_manager">Admin manager</option>
                 </select>
               </label>
 
@@ -273,7 +277,7 @@ export function TeamManager({
                       </p>
                     </div>
 
-                    {member.canRevoke ? (
+                    {member.canRevoke && canRevokeMembers ? (
                       <button
                         type="button"
                         className="chip inline-flex items-center gap-2"
@@ -285,7 +289,7 @@ export function TeamManager({
                     ) : (
                       <span className="chip inline-flex items-center gap-2">
                         <Shield className="h-4 w-4" />
-                        Acces fixe
+                        {member.canRevoke ? "Retrait reserve au super admin" : "Acces fixe"}
                       </span>
                     )}
                   </div>

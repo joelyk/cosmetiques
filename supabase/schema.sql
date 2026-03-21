@@ -73,7 +73,7 @@ create table if not exists store_settings (
 
 create table if not exists admin_members (
   email text primary key,
-  role text not null default 'admin_sales' check (role in ('admin', 'admin_catalog', 'admin_sales', 'super_admin')),
+  role text not null default 'admin_sales' check (role in ('admin', 'admin_catalog', 'admin_sales', 'admin_manager', 'super_admin')),
   invited_by_email text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -82,7 +82,7 @@ create table if not exists admin_members (
 create table if not exists admin_invites (
   id text primary key,
   email text not null,
-  role text not null default 'admin_sales' check (role in ('admin', 'admin_catalog', 'admin_sales')),
+  role text not null default 'admin_sales' check (role in ('admin', 'admin_catalog', 'admin_sales', 'admin_manager')),
   status text not null default 'pending' check (status in ('pending', 'accepted', 'revoked', 'expired')),
   invited_by_email text,
   accepted_by_email text,
@@ -171,6 +171,20 @@ alter table admin_invites
   add column if not exists accepted_at timestamptz,
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
+
+alter table admin_members
+  drop constraint if exists admin_members_role_check;
+
+alter table admin_members
+  add constraint admin_members_role_check
+  check (role in ('admin', 'admin_catalog', 'admin_sales', 'admin_manager', 'super_admin'));
+
+alter table admin_invites
+  drop constraint if exists admin_invites_role_check;
+
+alter table admin_invites
+  add constraint admin_invites_role_check
+  check (role in ('admin', 'admin_catalog', 'admin_sales', 'admin_manager'));
 
 alter table checkout_requests
   add column if not exists items jsonb not null default '[]'::jsonb;

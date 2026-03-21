@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { EmailLoginForm } from "@/components/auth/email-login-form";
-import { acceptAdminInvite, canManageAdminTeam } from "@/lib/admin-team";
+import { acceptAdminInvite } from "@/lib/admin-team";
 import { env } from "@/lib/env";
 import { canAccessAdmin } from "@/lib/roles";
 
@@ -86,7 +86,7 @@ export default async function InvitationAdminPage({
     );
   }
 
-  if (canAccessAdmin(session.user.role) && !canManageAdminTeam(session.user.role)) {
+  if (canAccessAdmin(session.user.role)) {
     redirect("/admin");
   }
 
@@ -117,4 +117,3 @@ export default async function InvitationAdminPage({
     </section>
   );
 }
-

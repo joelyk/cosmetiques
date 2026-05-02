@@ -1,0 +1,9 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="800" rx="80" fill="#FBEEE4"/>
+  <ellipse cx="400" cy="650" rx="170" ry="34" fill="#E8D4C8"/>
+  <rect x="302" y="196" width="196" height="308" rx="68" fill="#E2A562"/>
+  <rect x="334" y="126" width="132" height="84" rx="26" fill="#2A1A18"/>
+  <rect x="364" y="92" width="72" height="46" rx="14" fill="#DDBF7F"/>
+  <circle cx="400" cy="340" r="58" fill="#F9E7DA" fill-opacity="0.72"/>
+  <text x="400" y="353" text-anchor="middle" fill="#5B3727" font-size="36" font-family="Georgia">FLEUR</text>
+</svg>

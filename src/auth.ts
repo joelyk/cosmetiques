@@ -1,0 +1,72 @@
+import "server-only";
+
+import { redirect } from "next/navigation";
+
+import { getUserRole } from "@/lib/admin-team";
+import { createSupabaseServerAuthClient } from "@/lib/supabase-auth-server";
+import type { UserRole } from "@/types/catalog";
+
+export type AppSession = {
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+    role: UserRole;
+    emailConfirmedAt: string | null;
+    lastSignInAt: string | null;
+  };
+};
+
+const getDisplayName = (user: {
+  email?: string | null;
+  user_metadata?: { full_name?: unknown; name?: unknown };
+}) => {
+  const fullName =
+    typeof user.user_metadata?.full_name === "string"
+      ? user.user_metadata.full_name
+      : typeof user.user_metadata?.name === "string"
+        ? user.user_metadata.name
+        : null;
+
+  return fullName ?? user.email ?? null;
+};
+
+export async function auth(): Promise<AppSession | null> {
+  try {
+    const supabase = await createSupabaseServerAuthClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return null;
+    }
+
+    const role = await getUserRole(user.email);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email ?? null,
+        name: getDisplayName(user),
+        role,
+        emailConfirmedAt: user.email_confirmed_at ?? null,
+        lastSignInAt: user.last_sign_in_at ?? null,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function signOut({
+  redirectTo = "/",
+}: {
+  redirectTo?: string;
+} = {}) {
+  const supabase = await createSupabaseServerAuthClient();
+
+  await supabase.auth.signOut();
+  redirect(redirectTo);
+}
